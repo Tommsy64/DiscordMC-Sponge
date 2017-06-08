@@ -1,0 +1,65 @@
+plugins {
+    id "java"
+    id "eclipse"
+    id "com.diffplug.gradle.spotless" version "3.4.0"
+    id "org.spongepowered.plugin" version "0.8.1"
+    id "com.github.johnrengelman.shadow" version "2.0.0"
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+group = 'com.tommsy'
+version = '1.0-SNAPSHOT'
+description = 'A Discord <-> Minecraft gateway for Sponge.'
+
+repositories {
+    jcenter()
+    maven {
+        url  "https://jitpack.io"
+    }
+}
+
+dependencies {
+    compileOnly "org.spongepowered:spongeapi:5.1.0"
+    compile "com.github.austinv11:Discord4J:2.8.2"
+
+    compileOnly "org.projectlombok:lombok:1.16.+"
+}
+
+sponge {
+    plugin {
+        meta {
+            url = "https://github.com/Tommsy64/DiscordMC-Sponge"
+            authors = ["Tommsy64"]
+        }
+    }
+}
+
+shadowJar {
+    dependencies {
+        dependency("com.github.austinv11:Discord4J")
+    }
+}
+project.tasks.assemble.dependsOn project.tasks.shadowJar
+
+spotless {
+    java {
+        licenseHeaderFile 'spotless/license-header.txt'
+        // An import ordering file, exported from Eclipse
+        importOrderFile 'spotless/sponge.importorder'
+        removeUnusedImports()
+        // XML file dumped out by the Eclipse formatter
+        eclipse().configFile('spotless/sponge-format.xml')
+        trimTrailingWhitespace()
+    }
+    format 'misc', {
+        target '**/*.xml', '**/.gitignore', "*.properties", "*.gradle"
+        indentWithSpaces()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    lineEndings 'PLATFORM_NATIVE'
+}
+
+task format(dependsOn: 'spotlessApply', group: 'spotless')
